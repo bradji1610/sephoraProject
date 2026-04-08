@@ -36,3 +36,12 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### sephora project
+*.iml
+
+.idea/
+
+*.class
+
+.DS_Store
