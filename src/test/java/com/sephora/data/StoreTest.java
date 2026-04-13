@@ -1,7 +1,11 @@
 package com.sephora.data;
 
 import com.sephora.data.model.Store;
+import com.sephora.data.service.StoreService;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -15,6 +19,7 @@ public class StoreTest {
         assertEquals("FR", store.getPays());
         assertEquals("OUVERT", store.getStatut());
     }
+
 }
 
 
