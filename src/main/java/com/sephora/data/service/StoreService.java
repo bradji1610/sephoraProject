@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class StoreService {
 
-    // Lecture du CSV
+    // CSV read
     public List<Store> loadStoresFromCsv(String filePath) {
         List<Store> stores = new ArrayList<>();
 
@@ -24,13 +24,13 @@ public class StoreService {
                     continue;
                 }
 
-                // Supprimer les guillemets éventuels
+                // Suppress unnecessary quotation mark
                 line = line.replace("\"", "");
 
-                // Séparer les champs
+                // Separate fields
                 String[] parts = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
 
-                // Assure que la taille de chaque ligne soit de 9 ( 9 éléments pour 9 colonnes)
+                // Assert every line contains 9 elements
                 if (parts.length < 9)
                     continue;
 
@@ -59,26 +59,25 @@ public class StoreService {
         return stores;
     }
 
-    // Comptage des magasins groupés pays
+    // group count per country
     public Map<String, Integer> countStoresByCountry(List<Store> stores) {
-        Map<String, Integer> map = new TreeMap<>(); // tri alphabétique
-        for (Store s : stores) {
-            String country = s.getPays();
-            map.put(country, map.getOrDefault(country, 0) + 1);
-        }
-        return map;
+        return stores.stream()
+                .collect(Collectors.groupingBy(
+                        Store::getPays,
+                        TreeMap::new,
+                        Collectors.summingInt(s -> 1)
+                ));
     }
 
-    // Magasin le plus ancien
+    // Oldest Store
     public Store findOldestStore(List<Store> stores) {
         return stores.stream()
                 .min(Comparator.comparing(Store::getDateOuverture))
                 .orElse(null);
-
-        // test pour plus tard , utiliser un Optional
     }
+        // To do use Optionnal
 
-    // Filtrer les magasins ouverts après une année donnée
+    // List of sorted stores after a year
     public List<Store> filterStoresAfter(List<Store> stores, String year) {
         int threshold = Integer.parseInt(year);
         return stores.stream()
@@ -92,4 +91,36 @@ public class StoreService {
                 })
                 .collect(Collectors.toList());
     }
+
+    // top 5 region per region
+    public List<Map.Entry<String, Long>> top5Regions(List<Store> stores) {
+        return stores.stream()
+                .collect(Collectors.groupingBy(
+                        Store::getRegion,
+                        Collectors.counting()
+                ))
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .limit(5)
+                .collect(Collectors.toList());
+    }
+
+    // Total surface per country
+    public Map<String, Integer> totalSurfaceByCountry(List<Store> stores) {
+        return stores.stream()
+                .collect(Collectors.groupingBy(
+                        Store::getPays,
+                        Collectors.summingInt(Store::getSurface)
+                ));
+    }
+
+    //List of renewed store sorted by surface (desc)
+    public List<Store> getRenovationStoresSorted(List<Store> stores) {
+        return stores.stream()
+                .filter(s -> "RENOVATION".equals(s.getStatut()))
+                .sorted(Comparator.comparing(Store::getSurface).reversed())
+                .collect(Collectors.toList());
+    }
 }
+
